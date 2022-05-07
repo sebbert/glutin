@@ -786,7 +786,7 @@ unsafe fn load_extra_functions(win: HWND) -> Result<gl::wgl_extra::Wgl, Creation
         }
 
         // access to class information of the real window
-        let instance = GetModuleHandleW(std::ptr::null());
+        let instance = GetWindowLongPtrW(win, GWLP_HINSTANCE) as HINSTANCE;
         let mut class: WNDCLASSEXW = std::mem::zeroed();
 
         if GetClassInfoExW(instance, class_name.as_ptr(), &mut class) == 0 {
@@ -806,6 +806,7 @@ unsafe fn load_extra_functions(win: HWND) -> Result<gl::wgl_extra::Wgl, Creation
         class.cbSize = std::mem::size_of::<WNDCLASSEXW>() as UINT;
         class.lpszClassName = class_name.as_ptr();
         class.lpfnWndProc = Some(DefWindowProcW);
+        class.hInstance = instance;
 
         // this shouldn't fail if the registration of the real window class
         // worked. multiple registrations of the window class trigger an
@@ -828,7 +829,7 @@ unsafe fn load_extra_functions(win: HWND) -> Result<gl::wgl_extra::Wgl, Creation
             rect.bottom - rect.top,
             std::ptr::null_mut(),
             std::ptr::null_mut(),
-            GetModuleHandleW(std::ptr::null()),
+            instance,
             std::ptr::null_mut(),
         );
 
